@@ -1,0 +1,441 @@
+import java.io.*;
+import java.util.Scanner;
+class Node{
+    float data;//权值
+    int parent;//父节点
+    int lchild;//左孩子
+    int rchild;//右孩子
+    int fuhao;//所代表的符号
+    Node()
+    {
+        parent = 0;
+        lchild = -1;
+        rchild = -1;
+    }
+}
+
+public class hafuman {
+    public static void insertcode(String filename,String str) throws IOException, IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            //System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f,true));//true,则追加写入text文本
+        String carmessage = str;
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+    public static void insertnode(String filename,Node node) throws IOException, IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            //System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f,true));//true,则追加写入text文本
+        String carmessage = "权值为"+node.data+" 父节点为"+node.parent+" 左孩子是"+node.lchild+" 右孩子是"+node.rchild;
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+    public static void creattree() throws IOException//生成哈夫曼树
+    {
+        int len = 0;
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入字符长度");
+        int lenth = scanner.nextInt();
+        int[] word = new int[26];//每个字母数量*/
+        System.out.println("请输入字符");
+        String str = scanner.next();
+
+        System.out.println("请输入每个字符权值");
+        Scanner in = new Scanner(System.in);
+        String powerword = in.nextLine();
+
+        String[]  temp = new String[26];
+        temp = powerword.split(" ");
+
+        for(int i=0;i<26;i++) {
+            sumword[i] = Integer.parseInt(temp[i]);//权值获取按照abcd顺序排列
+        }
+        for(int i=0;i<str.length();i++)//获取每个字母数量
+        {
+            word[str.charAt(i)-'a']++;
+        }
+        for (int i=0;i<26;i++)
+        {
+            if(word[i]!=0)
+            {
+                len++;
+            }
+        }
+        Node[] nodes = new Node[2*len-1];//哈夫曼树组
+        int j=0;
+        int[] newword = new int[len];
+        for(int i =0;i<26;i++)//有的字符装入数组按照顺序
+        {
+            if(word[i]!=0)
+            {
+                newword[j] = i;
+                j++;
+            }
+
+        }
+        j = 0;
+        for(int i=0;i<nodes.length;i++)//装入数组初始化
+        {
+            Node node = new Node();
+            nodes[i] = node;
+        }
+        for(int i=0;i<26;i++)
+        {
+            if(word[i]!=0)//按照字母表顺序装入
+            {
+                nodes[j].data = sumword[i];//如果元素的个数不为0则把元素装进去
+                nodes[j].fuhao = i+'a';
+                j++;
+            }
+        }
+        j=len;
+
+        while(j!=(2*len-1))//构建哈夫曼树
+        {
+            float max1 = 5000000;
+            float max2 = 5000000;
+            int flag1 = 0;
+            int flag2 = 0;
+            int i;
+            for( i=0;i<j;i++)//找出前二小的权值
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(nodes[i].data<max1)
+                    {
+                        max1 = nodes[i].data;
+                        flag1 = i;
+
+                    }
+                }
+            }
+            for( i=0;i<j;i++)
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(i!=flag1)
+                    {
+                        if(nodes[i].data<max2)
+                        {
+                            max2 = nodes[i].data;
+                            flag2 = i;
+                        }
+                    }
+                }
+            }
+
+            nodes[j].data = max1+max2;//权值等于两者相加
+            nodes[j].lchild = flag1;//左孩子是第一小的
+
+            nodes[j].rchild = flag2;//右孩子是第二小的
+            nodes[j].parent = 0;//父亲置为0
+            nodes[flag1].parent = j;//左孩子父亲赋值
+            nodes[flag2].parent = j;//右孩子父亲赋值
+            j++;
+        }
+        for(int i = 0;i<nodes.length;i++)
+        {
+            insertnode(filename,nodes[i]);
+
+        }
+        System.out.println("哈夫曼树创建完毕已写入文件");
+        coding(nodes,len,str);
+    }
+    public static void coding(Node[] nodes,int len,String word)//对字符进行编码 传入哈夫曼树，字符种类的个数，字符串
+    {
+        int flag=0;
+        String hafumancode = "";
+        String antihafumancode="";
+        System.out.println("编码结果是");
+        while(flag<word.length())
+        {
+            for(int i = 0;i<len;i++)
+            {
+                if(nodes[i].fuhao==word.charAt(flag))
+                {
+                    int j = i;
+                    while (nodes[j].parent != 0) {
+                        if (nodes[nodes[j].parent].lchild == j)//如果父节点的左孩子是他则0
+                            hafumancode += '0';
+                        else if (nodes[nodes[j].parent].rchild == j)//如果父节点的右孩子是他则1
+                            hafumancode += '1';
+                        j = nodes[j].parent;
+                    }
+
+                    for(int k=0;k<hafumancode.length();k++)
+                    {
+                        antihafumancode+=hafumancode.charAt(hafumancode.length()-1-k);
+                    }
+                    System.out.print(antihafumancode);
+                    hafumancode = "";
+                    antihafumancode="";
+                    flag++;
+                    break;
+                }
+            }
+        }
+        for(int i =0;i<26;i++)//初始化
+        {
+            sumword[i]=0;
+        }
+    }
+    public static String readfile() throws IOException {
+        File file = new File("C:/Users/Rekkles/Desktop/codefile.txt");
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String st;
+        String st1 = "";
+        while ((st = br.readLine()) != null)
+            st1+=st;
+        return st1;
+    }
+    public static void coding() throws IOException//对文件用已有的哈夫曼树进行编码
+    {
+        Node[] nodes = new Node[2*26-1];
+        for(int i=0;i<2*26-1;i++)//初始化
+        {
+            Node node = new Node();
+            nodes[i] = node;
+        }
+        for(int i=0;i<26;i++)
+        {
+            nodes[i].fuhao = i+'a';
+            nodes[i].data = power[i];
+        }
+        int j = 26;
+        while(j!=(2*26-1))//构建哈夫曼树
+        {
+            float max1 = 5000000;
+            float max2 = 5000000;
+            int flag1 = 0;
+            int flag2 = 0;
+            int i;
+            for( i=0;i<j;i++)//找出前二小的权值
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(nodes[i].data<max1)
+                    {
+                        max1 = nodes[i].data;
+                        flag1 = i;
+
+                    }
+                }
+            }
+            for( i=0;i<j;i++)
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(i!=flag1)
+                    {
+                        if(nodes[i].data<max2)
+                        {
+                            max2 = nodes[i].data;
+                            flag2 = i;
+                        }
+                    }
+                }
+            }
+
+            nodes[j].data = max1+max2;//权值等于两者相加
+            nodes[j].lchild = flag1;//左孩子是第一小的
+
+            nodes[j].rchild = flag2;//右孩子是第二小的
+            nodes[j].parent = 0;//父亲置为0
+            nodes[flag1].parent = j;//左孩子父亲赋值
+            nodes[flag2].parent = j;//右孩子父亲赋值
+            j++;
+        }
+        String word = readfile();//读取文件的字符串
+
+        int flag = 0;
+        String hafumancode = "";
+        String antihafumancode = "";
+        String allcode="";
+        while(flag<word.length())
+        {
+            for(int i = 0;i<26;i++)
+            {
+
+                if(nodes[i].fuhao==word.charAt(flag))
+                {
+                    int m = i;
+
+                    while (nodes[m].parent != 0) {
+                        if (nodes[nodes[m].parent].lchild == m)//如果父节点的左孩子是他则0
+                            hafumancode += '0';
+                        else if (nodes[nodes[m].parent].rchild == m)//如果父节点的右孩子是他则1
+                            hafumancode += '1';
+                        m = nodes[m].parent;
+                    }
+
+                    for(int k=0;k<hafumancode.length();k++)
+                    {
+                        antihafumancode+=hafumancode.charAt(hafumancode.length()-1-k);
+                    }
+                    allcode+=antihafumancode;
+                    hafumancode = "";
+                    antihafumancode="";
+                    flag++;
+                    break;
+                }
+            }
+        }
+        insertcode(filename1,allcode);//写入文件
+        for(int i = 0;i<allcode.length();i++)
+        {
+            if((i+1)%50==0)
+            {
+                System.out.print(allcode.charAt(i));
+                System.out.println();
+            }
+
+            else
+                System.out.print(allcode.charAt(i));
+        }
+
+    }
+
+    public static void decoding() throws IOException//解码
+    {
+        String word = readfile();
+        Node[] nodes = new Node[2*26-1];
+        for(int i=0;i<2*26-1;i++)//初始化
+        {
+            Node node = new Node();
+            nodes[i] = node;
+        }
+        for(int i=0;i<26;i++)
+        {
+            nodes[i].fuhao = i+'a';
+            nodes[i].data = power[i];
+        }
+        int j = 26;
+        while(j!=(2*26-1))//构建哈夫曼树
+        {
+            float max1 = 5000000;
+            float max2 = 5000000;
+            int flag1 = 0;
+            int flag2 = 0;
+            int i;
+            for( i=0;i<j;i++)//找出前二小的权值
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(nodes[i].data<max1)
+                    {
+                        max1 = nodes[i].data;
+                        flag1 = i;
+
+                    }
+                }
+            }
+            for( i=0;i<j;i++)
+            {
+                if(nodes[i].parent==0)
+                {
+                    if(i!=flag1)
+                    {
+                        if(nodes[i].data<max2)
+                        {
+                            max2 = nodes[i].data;
+                            flag2 = i;
+                        }
+                    }
+                }
+            }
+
+            nodes[j].data = max1+max2;//权值等于两者相加
+            nodes[j].lchild = flag1;//左孩子是第一小的
+
+            nodes[j].rchild = flag2;//右孩子是第二小的
+            nodes[j].parent = 0;//父亲置为0
+            nodes[flag1].parent = j;//左孩子父亲赋值
+            nodes[flag2].parent = j;//右孩子父亲赋值
+            j++;
+        }
+
+        int flag = 0;
+        String hafumancode = "";
+        String antihafumancode = "";
+        String[] code = new String[26];
+        while(flag<26)
+        {
+
+            int m = flag;
+            while (nodes[m].parent != 0) {
+                if (nodes[nodes[m].parent].lchild == m)//如果父节点的左孩子是他则0
+                    hafumancode += '0';
+                else if (nodes[nodes[m].parent].rchild == m)//如果父节点的右孩子是他则1
+                    hafumancode += '1';
+                     m = nodes[m].parent;
+            }
+
+                    for(int k=0;k<hafumancode.length();k++)
+                    {
+                        antihafumancode+=hafumancode.charAt(hafumancode.length()-1-k);
+                    }
+                    code[flag] = antihafumancode;
+                    hafumancode = "";
+                    antihafumancode="";
+                    flag++;
+        }
+        String demo = "";
+        String text = "";
+            for(int k=0;k<word.length();k++)
+            {
+                demo+=word.charAt(k);
+                for(int m=0;m<26;m++)
+                {
+                    if(demo.equals(code[m]))
+                    {
+                        text+=((char)('a'+m));
+                        demo="";
+                        break;
+                    }
+                }
+            }
+        insertcode(filename2,text);
+        System.out.println("文件解码完成");
+    }
+    static int[] sumword = new int[26];
+    static int[] power = {64,23,22,32,103,21,15,47,57,1,5,32,20,20,56,19,2,50,51,55,30,10,11,2,21,2};//定义的哈夫曼树
+    static String filename = "C:/Users/Rekkles/Desktop/hafuman.txt";
+    static String filename1 = "C:/Users/Rekkles/Desktop/codefile.txt";
+    static String filename2 = "C:/Users/Rekkles/Desktop/textfile.txt";
+    public static void main(String[] args) throws IOException {
+        System.out.println("****************************************");
+        System.out.println("***************哈夫曼编码译码器************");
+        System.out.println("****************************************");
+        System.out.println("输入1手动创建哈夫曼树");
+        System.out.println("输入2用以已经创建好的哈夫曼树对文件编码");
+        System.out.println("输入3用以创建好的哈夫曼树对文件进行解码");
+        System.out.println("请输入你的选择");
+        Scanner scanner = new Scanner(System.in);
+        int point = scanner.nextInt();
+        switch (point)
+        {
+            case 1:creattree();
+                break;
+            case 2:coding();
+                break;
+            case 3:decoding();
+                break;
+            default:break;
+        }
+    }
+}

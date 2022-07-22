@@ -1,0 +1,865 @@
+import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Scanner;
+
+import static java.lang.System.exit;
+
+class City{
+    String cityname;//城市名称
+    int id;//城市代号用于数组创建方便指向
+    int[] pointcity = new int[30];//指向的城市
+    int sum;//指向城市的数量
+    int flag;
+    City()
+    {
+
+    }
+}
+class bianji{
+    City scity;//起点
+    City ecity;//终点
+    int data;//权值
+    bianji()
+    {
+        scity = new City();
+        ecity = new City();
+        data = 900000000;
+    }
+
+}
+class Train{
+    City stratcity;//起始城市
+    City endcity;//终点城市
+    int money;//车费
+    String starttime;//发车时间
+    String endtime;//到达时间
+    int trainid;//列车编号
+    Train()
+    {
+        stratcity = new City();
+        endcity = new City();
+    }
+
+}
+public class Asktraffic {
+    public static void clearInfoForFile(String fileName) {
+        File file = new File(fileName);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("");
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static City[] getcity(String fileName) {
+        String[] str = new String[20];
+        try {
+            File myFile = new File(fileName);//通过字符串创建File类型对象，指向该字符串路径下的文件
+
+            if (myFile.isFile() && myFile.exists()) { //判断文件是否存在
+
+                InputStreamReader Reader = new InputStreamReader(new FileInputStream(myFile), "UTF-8");
+                //考虑到编码格式，new FileInputStream(myFile)文件字节输入流，以字节为单位对文件中的数据进行读取
+                //new InputStreamReader(FileInputStream a, "编码类型")
+                //将文件字节输入流转换为文件字符输入流并给定编码格式
+
+                BufferedReader bufferedReader = new BufferedReader(Reader);
+                //BufferedReader从字符输入流中读取文本，缓冲各个字符，从而实现字符、数组和行的高效读取。
+                //通过BuffereReader包装实现高效读取
+
+                String lineTxt = null;
+                City[] cities = new City[30];
+                int flag = 0;
+                while ((lineTxt = bufferedReader.readLine()) != null) {//获取目前文件中的数据
+                    //buffereReader.readLine()按行读取写成字符串
+
+                    str = lineTxt.split(" ");
+                    City city = new City();
+                    city.cityname = str[0];
+                    city.id = Integer.parseInt(str[1]);
+                    city.sum = Integer.parseInt(str[2]);
+                    for (int i = 0; i < city.sum; i++) {
+                        city.pointcity[i] = Integer.parseInt(str[3 + i]);
+                    }
+                    cities[flag] = city;
+                    flag++;
+                    if (flag == citynumber)
+                        break;
+                }
+
+                Reader.close();
+
+                return cities;
+            } else {
+
+                System.out.println("找不到指定的文件");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("读取文件内容出错");
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void insetcity(String filename, City city) throws IOException, IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            //System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f, true));//true,则追加写入text文本
+        String str = "";
+        for (int i = 0; i < city.sum; i++) {
+            str += (String.valueOf(city.pointcity[i]) + " ");
+        }
+        String carmessage = city.cityname + " " + city.id + " " + city.sum + " " + str;
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+
+    public static void inserttarin(String filename, Train train) throws IOException, IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            //System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f, true));//true,则追加写入text文本
+        String carmessage = train.stratcity.id + " " + train.endcity.id + " " + train.money + " " + train.starttime + " " + train.endtime + " " + train.trainid;
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+
+    public static void Addcity() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        City addcity = new City();
+        System.out.println("请输入城市名称");
+        addcity.cityname = scanner.next();
+        System.out.println("请输入城市id");
+        addcity.id = scanner.nextInt();
+        System.out.println("请输入指向城市的数量");
+        addcity.sum = scanner.nextInt();
+        System.out.println("请输入指向城市编号");
+        for (int i = 0; i < addcity.sum; i++) {
+            addcity.pointcity[i] = scanner.nextInt();
+        }
+        System.out.println("请输入指向他的城市个数");
+        int toself = scanner.nextInt();
+        System.out.println("请输入哪些城市指向他");
+        int j = 0;
+        for (int i = 0; i < toself; i++) {
+            int cityid = scanner.nextInt();
+            for (j = 0; j < cities.length; j++) {
+                if (cityid == cities[j].id) {
+                    cities[j].pointcity[cities[j].sum] = addcity.id;
+                    cities[j].sum++;//对应城市的指向数量++
+                    break;
+                }
+            }
+            if (j > cities.length) {
+                System.out.println("未找到城市");
+            }
+        }
+        cities[citynumber] = addcity;
+        citynumber++;
+        clearInfoForFile(cityfilename);
+        for (int i = 0; i < citynumber; i++) {
+            insetcity(cityfilename, cities[i]);
+        }
+        System.out.println("增加完毕");
+    }
+
+    public static void Delcity() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入要删除的城市id");
+        int delcity = scanner.nextInt();
+        for (int i = 0; i < citynumber; i++) {
+            if (cities[i].id == delcity)//找到删除的城市
+            {
+                for (int j = 0; j < citynumber; j++)//删除所有城市有指向他的点
+                {
+                    for (int k = 0; k < cities[j].sum; k++) {
+                        if (cities[j].pointcity[k] == delcity) {
+                            if (k == cities[j].sum - 1) {
+                                cities[j].sum--;
+                            } else {
+                                for (int m = k; m < cities[j].sum - 1; m++) {
+                                    cities[j].pointcity[m] = cities[j].pointcity[m + 1];
+
+                                }
+                                cities[j].sum--;
+                            }
+                        }
+                    }
+                }//城市删除指向他的点完毕
+                if (i == citynumber - 1) {
+                    citynumber--;
+                } else {
+                    for (int k = i; k < citynumber - 1; k++) {
+                        cities[i] = cities[i + 1];
+                    }
+                    citynumber--;
+                }
+                break;
+            }
+        }
+        clearInfoForFile(cityfilename);
+        for (int i = 0; i < citynumber; i++) {
+            insetcity(cityfilename, cities[i]);
+        }
+        System.out.println("删除完毕");
+    }
+
+    public static Train[] gettrain(String fileName) {
+        String[] str = new String[20];
+        try {
+            File myFile = new File(fileName);//通过字符串创建File类型对象，指向该字符串路径下的文件
+
+            if (myFile.isFile() && myFile.exists()) { //判断文件是否存在
+
+                InputStreamReader Reader = new InputStreamReader(new FileInputStream(myFile), "UTF-8");
+                //考虑到编码格式，new FileInputStream(myFile)文件字节输入流，以字节为单位对文件中的数据进行读取
+                //new InputStreamReader(FileInputStream a, "编码类型")
+                //将文件字节输入流转换为文件字符输入流并给定编码格式
+
+                BufferedReader bufferedReader = new BufferedReader(Reader);
+                //BufferedReader从字符输入流中读取文本，缓冲各个字符，从而实现字符、数组和行的高效读取。
+                //通过BuffereReader包装实现高效读取
+
+                String lineTxt = null;
+                Train[] trains = new Train[30];
+                int flag = 0;
+                while ((lineTxt = bufferedReader.readLine()) != null) {//获取目前文件中的数据
+                    //buffereReader.readLine()按行读取写成字符串
+
+                    str = lineTxt.split(" ");
+                    Train train = new Train();
+                    train.endcity = new City();
+                    train.stratcity = new City();
+                    int temp = Integer.parseInt(str[0]);
+                    for (int i = 0; i < citynumber; i++) {
+                        if (temp == cities[i].id) {
+                            train.stratcity = cities[i];
+                            break;
+                        }
+                    }
+                    int temp1 = Integer.parseInt(str[1]);
+                    for (int i = 0; i < citynumber; i++) {
+                        if (temp1 == cities[i].id) {
+                            train.endcity = cities[i];
+                            break;
+                        }
+                    }
+                    train.money = Integer.parseInt(str[2]);
+                    train.starttime = str[3];
+                    train.endtime = str[4];
+                    train.trainid = Integer.parseInt(str[5]);
+                    trains[flag] = train;
+                    flag++;
+                    if (flag == trainnumber)
+                        break;
+                }
+
+                Reader.close();
+
+                return trains;
+            } else {
+
+                System.out.println("找不到指定的文件");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("读取文件内容出错");
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void Admincity() throws IOException {
+        System.out.println("输入1添加城市");
+        System.out.println("输入2删除城市");
+        Scanner scanner = new Scanner(System.in);
+        int choose = scanner.nextInt();
+        switch (choose) {
+            case 1:
+                Addcity();
+                break;
+            case 2:
+                Delcity();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static void showtrain() {
+        for (int i = 0; i < trainnumber; i++) {
+            System.out.println("起始地点" + trains[i].stratcity.cityname + " " + "终点站" + trains[i].endcity.cityname + " 费用是" + String.valueOf(trains[i].money) + " 发车时间" + trains[i].starttime + " 到达时间是" + trains[i].endtime + " 列车编号是" + trains[i].trainid);
+        }
+    }
+
+    public static void Addtrain() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        Train train = new Train();
+        System.out.println("请输入起点站编号");
+        int id = scanner.nextInt();
+        int i;
+        for (i = 0; i < citynumber; i++) {
+            if (id == cities[i].id) {
+                train.stratcity = cities[i];
+                break;
+            }
+        }
+        if (i >= citynumber) {
+            System.out.println("没有这个城市");
+            return;
+        }
+        System.out.println("请输入终点站站编号");
+        int id1 = scanner.nextInt();
+        for (i = 0; i < citynumber; i++) {
+            if (id1 == cities[i].id) {
+                train.endcity = cities[i];
+                break;
+            }
+        }
+        if (i >= citynumber) {
+            System.out.println("没有这个城市");
+            return;
+        }
+        for (i = 0; i < train.stratcity.sum; i++) {
+            if (train.stratcity.pointcity[i] == train.endcity.id) {
+                System.out.println("两城市直接联通可以添加列车");
+                break;
+            }
+
+        }
+        if (i >= train.stratcity.sum) {
+            System.out.println("两城市直接没有直接联通不能添加直达列车");
+            return;
+        }
+
+        System.out.println("请输入需要花费的金额");
+        train.money = scanner.nextInt();
+        System.out.println("请输入发车时间");
+        train.starttime = scanner.next();
+        System.out.println("请输入到达时间");
+        train.endtime = scanner.next();
+        System.out.println("请输入列车编号");
+        int tranid = scanner.nextInt();
+        for (i = 0; i < trainnumber; i++) {
+            if (trains[i].trainid == tranid) {
+                System.out.println("列车编号重复");
+                return;
+            }
+        }
+        train.trainid = tranid;
+        trains[trainnumber] = train;
+        trainnumber++;
+        clearInfoForFile(trainfilename);
+        for (i = 0; i < trainnumber; i++)
+            inserttarin(trainfilename, trains[i]);
+        System.out.println("添加成功");
+    }
+
+    public static void Deltarin() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入你要删除的列车编号");
+        int tranid = scanner.nextInt();
+        for (int i = 0; i < trainnumber; i++) {
+
+            if (trains[i].trainid == tranid) {
+                if (i == trainnumber - 1) {
+                    trainnumber--;
+                    break;
+                } else {
+                    for (int j = i; j < trainnumber - 1; j++) {
+                        trains[j] = trains[j + 1];
+                    }
+                    trainnumber--;
+                    break;
+                }
+            } else {
+                if (i >= trainnumber) {
+                    System.out.println("没有找到这个列车编号");
+                    return;
+                }
+            }
+        }
+        clearInfoForFile(trainfilename);
+        for (int i = 0; i < trainnumber; i++) {
+
+            inserttarin(trainfilename, trains[i]);
+        }
+        System.out.println("删除完毕");
+
+    }
+
+    public static void Admintrain() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("输入1查询所有列车表");
+        System.out.println("输入2添加列车表");
+        System.out.println("输入3删除列车表");
+        System.out.println("请输入");
+        int choose = scanner.nextInt();
+        switch (choose) {
+            case 1:
+                showtrain();
+                break;
+            case 2:
+                Addtrain();
+                break;
+            case 3:
+                Deltarin();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static City checkcitybyid(int id) {
+        for (int i = 0; i < citynumber; i++) {
+            if (cities[i].id == id)
+                return cities[i];
+        }
+        return null;
+    }
+    public static boolean isto(City scity,City ecity)
+    {
+        for (int i = 0;i<scity.sum;i++)
+        {
+            if(scity.pointcity[i]==ecity.id)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bianji[] allbianji()
+    {
+        int j, k=0,sum = 0;
+        bianji[] bianjis = new bianji[100];
+        for (int i = 0;i<100;i++)
+        {
+            bianjis[i] = new bianji();
+        }
+        for(int x=0;x<citynumber;x++) {
+            for (int i = 0; i < citynumber; i++)//初始化边集
+            {
+                if ((cities[i].id != cities[x].id)) {
+                    bianjis[sum].scity = cities[x];
+                    bianjis[sum].ecity = cities[i];
+                    for (j = 0; j < trainnumber-1; j++) {
+                        if ((trains[j].stratcity.id == bianjis[sum].scity.id) && (trains[j].endcity.id == bianjis[sum].ecity.id)) {//如果通车且指向
+                            bianjis[sum].data = trains[j].money;
+                            sum++;
+                            break;
+                        }
+                    }
+                    if (j >= trainnumber) {
+                        bianjis[sum].data = 999999999;
+                        sum++;
+                        break;
+                    }
+                }
+                else {
+
+                }
+            }
+        }
+        return bianjis;
+    }
+    public static bianji[] allbianji1() throws ParseException {
+        int j,sum = 0;
+        bianji[] bianjis = new bianji[100];
+        for (int i = 0;i<100;i++)
+        {
+            bianjis[i] = new bianji();
+        }
+        for(int x=0;x<citynumber;x++) {
+            for (int i = 0; i < citynumber; i++)//初始化边集
+            {
+                if ((cities[i].id != cities[x].id)) {
+                    bianjis[sum].scity = cities[x];
+                    bianjis[sum].ecity = cities[i];
+                    for (j = 0; j < trainnumber-1; j++) {
+                        if ((trains[j].stratcity.id == bianjis[sum].scity.id) && (trains[j].endcity.id == bianjis[sum].ecity.id)) {//如果通车且指向
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+                            Date start = sdf.parse(trains[j].starttime);
+                            Date enddate = sdf.parse(trains[j].endtime);
+                            long time = (enddate.getTime()-start.getTime())/1000/60;
+                            bianjis[sum].data = (int)time;
+                            sum++;
+                            break;
+                        }
+                    }
+                    if (j >= trainnumber) {
+                        bianjis[sum].data = 999999999;
+                        sum++;
+                        break;
+                    }
+                }
+                else {
+
+                }
+            }
+        }
+        return bianjis;
+    }
+    public static void prim1(City startcity,City endcity) throws ParseException {
+        bianji[] bianjis = new bianji[citynumber];
+        for(int i = 0;i<citynumber;i++)
+        {
+            bianjis[i] = new bianji();
+        }
+        bianji[] allbianji = new bianji[100];
+        for (int i = 0;i<100;i++)
+        {
+            allbianji[i] = new bianji();
+        }
+        allbianji = allbianji1();
+        int j,k = 0;
+
+        for (int i = 0;i<citynumber;i++)//初始化边集
+        {
+            if((cities[i].id!=startcity.id)) {
+                bianjis[k].scity = startcity;
+                bianjis[k].ecity = cities[i];
+                for ( j = 0; j < trainnumber; j++) {
+                    if ((trains[j].stratcity.id == bianjis[k].scity.id) && (trains[j].endcity.id == bianjis[k].ecity.id))
+                    {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+                        Date start = sdf.parse(trains[j].starttime);
+                        Date enddate = sdf.parse(trains[j].endtime);
+                        long time = (enddate.getTime()-start.getTime())/1000/60;
+                        bianjis[k].data = (int)time;
+                        k++;
+                        break;
+                    }
+                }
+                if(j>=trainnumber)
+                {
+                    bianjis[k].data = 99999999;
+                    k++;
+                }
+            }
+            else{
+
+            }
+        }
+        int min = 9999999;
+        int point = 0;
+        int x = 0;
+        int flag = 0;
+        while((flag!=citynumber))//构建边集表
+        {
+            if ((bianjis[flag].ecity.id==endcity.id))
+            {
+                break;
+            }
+            for(int i = flag;i<citynumber-1;i++)//找出最小权值的边
+            {
+                if(bianjis[i].data<min)
+                {
+                    min = bianjis[i].data;
+                    point = i;//记录当前值
+                }
+            }
+            bianji temp = new bianji();
+            temp = bianjis[point];//交换
+            bianjis[point] = bianjis[flag];
+            bianjis[flag] = temp;
+            flag++;//
+
+
+            int symbol = bianjis[flag-1].ecity.id;
+
+            for(int m =flag;m<citynumber-1;m++)//调整边集合
+            {
+                for( x = 0;x<100;x++)
+                {
+                    if((allbianji[x].scity.id==symbol)&&allbianji[x].ecity.id==bianjis[m].ecity.id)
+                    {
+                        if(allbianji[x].data<bianjis[m].data)
+                        {
+                            bianjis[m] = allbianji[x];
+                        }
+
+                    }
+                }
+            }
+        }
+        Train[] trains1 = new Train[10];
+        int lenth = 0;
+        for(int i = 0;i<flag-1;i++)//遍历边集表输出路线
+        {
+            City city1 = new City();
+            city1.id = bianjis[i].scity.id;
+            City city2 = new City();
+            city2.id = bianjis[i].ecity.id;
+            for(int m=0;m<trainnumber;m++)
+            {
+                if((trains[m].stratcity.id==city1.id)&&(trains[m].endcity.id==city2.id))
+                {
+                    trains1[lenth] = trains[m];
+                    lenth++;
+                }
+            }
+        }
+        System.out.println("最少花费路线是从");
+        int allmoney = 0;
+        for (int i = 0;i<lenth;i++)
+        {
+            System.out.println(trains1[i].stratcity.cityname+"到"+trains1[i].endcity.cityname+"花费"+bianjis[i].data+"分钟"+"发车时间"+trains1[i].starttime+"到达时间"+trains1[i].endtime);
+            allmoney+=bianjis[i].data;
+        }
+
+        System.out.println("总共花费"+allmoney+"分钟");
+    }
+    public static void prim(City startcity,City endcity)
+    {
+        bianji[] bianjis = new bianji[citynumber];
+        for(int i = 0;i<citynumber;i++)
+        {
+            bianjis[i] = new bianji();
+        }
+        bianji[] allbianji = new bianji[100];
+        for (int i = 0;i<100;i++)
+        {
+            allbianji[i] = new bianji();
+        }
+        allbianji = allbianji();
+        int j,k = 0;
+
+        for (int i = 0;i<citynumber;i++)//初始化边集
+        {
+            if((cities[i].id!=startcity.id)) {
+                bianjis[k].scity = startcity;
+                bianjis[k].ecity = cities[i];
+                for ( j = 0; j < trainnumber; j++) {
+                    if ((trains[j].stratcity.id == bianjis[k].scity.id) && (trains[j].endcity.id == bianjis[k].ecity.id))
+                    {
+                        bianjis[k].data = trains[j].money;
+                        k++;
+                        break;
+                    }
+                }
+                if(j>=trainnumber)
+                {
+                    bianjis[k].data = 999999;
+                    k++;
+                }
+            }
+            else{
+
+            }
+        }
+        int min = 9999999;
+        int point = 0;
+        int x = 0;
+        int flag = 0;
+        while((flag!=citynumber))//构建边集表
+        {
+            if ((bianjis[flag].ecity.id==endcity.id))
+            {
+                break;
+            }
+            for(int i = flag;i<citynumber-1;i++)//找出最小权值的边
+            {
+                if(bianjis[i].data<min)
+                {
+                    min = bianjis[i].data;
+                    point = i;//记录当前值
+                }
+            }
+            bianji temp = new bianji();
+            temp = bianjis[point];//交换
+            bianjis[point] = bianjis[flag];
+            bianjis[flag] = temp;
+            flag++;//
+
+
+            int symbol = bianjis[flag-1].ecity.id;
+
+            for(int m =flag;m<citynumber-1;m++)//调整边集合
+            {
+                for( x = 0;x<100;x++)
+                {
+                    if((allbianji[x].scity.id==symbol)&&allbianji[x].ecity.id==bianjis[m].ecity.id)
+                    {
+                        if(allbianji[x].data<bianjis[m].data)
+                        {
+                            bianjis[m] = allbianji[x];
+                        }
+
+                    }
+                }
+            }
+        }
+        Train[] trains1 = new Train[10];
+        int lenth = 0;
+        for(int i = 0;i<flag-1;i++)//遍历边集表输出路线
+        {
+            City city1 = new City();
+            city1.id = bianjis[i].scity.id;
+            City city2 = new City();
+            city2.id = bianjis[i].ecity.id;
+            for(int m=0;m<trainnumber;m++)
+            {
+                if((trains[m].stratcity.id==city1.id)&&(trains[m].endcity.id==city2.id))
+                {
+                    trains1[lenth] = trains[m];
+                    lenth++;
+                }
+            }
+        }
+        System.out.println("最少花费路线是从");
+        int allmoney = 0;
+        for (int i = 0;i<lenth;i++)
+        {
+            System.out.println(trains1[i].stratcity.cityname+"到"+trains1[i].endcity.cityname+"花费"+bianjis[i].data+"元"+"发车时间"+trains1[i].starttime+"到达时间"+trains1[i].endtime);
+            allmoney+=trains1[i].money;
+        }
+
+        System.out.println("总共花费"+allmoney+"元");
+    }
+    public static void Asktraffic() throws ParseException//交通咨询
+    {
+        System.out.println("请输入起点站和终点站");
+        Scanner scanner = new Scanner(System.in);
+        String startc = scanner.next();
+        String endc = scanner.next();
+        int i,j,k;
+        City scity = new City();
+        City ecity = new City();
+        for(i=0;i<citynumber;i++)
+        {
+            if(cities[i].cityname.equals(startc))
+            {
+                scity = cities[i];
+                break;
+            }
+        }
+        if(i>=citynumber)
+        {
+            System.out.println("没找到城市");
+            exit(0);
+        }
+        for(i=0;i<citynumber;i++)
+        {
+            if(cities[i].cityname.equals(endc))
+            {
+
+                ecity = cities[i];
+                break;
+            }
+        }
+        if(i>=citynumber)
+        {
+            System.out.println("没找到城市");
+            exit(0);
+        }
+        prim(scity,ecity);
+        prim1(scity,ecity);
+    }
+    public static String showpointcity(int id) {
+        String str = null;
+        for (int i = 0; i < citynumber; i++) {
+            if (cities[i].id == id)//找到id
+            {
+                str = "";
+                for (int j = 0; j < cities[i].sum; j++) {
+                    for (int k = 0; k < citynumber; k++) {
+                        if (cities[i].pointcity[j] == cities[k].id) {
+                            str += cities[k].cityname;
+                        }
+                    }
+                }
+            }
+        }
+        return str;
+    }
+    public static void showcitys()
+    {
+        for(int i = 0;i<citynumber;i++)
+        {
+            System.out.println("城市:"+cities[i].cityname+"id"+cities[i].id+"指向城市"+showpointcity(cities[i].id));
+        }
+
+    }
+    public static void inittest()//初始化设置
+    {
+        City city = new City();
+        city.cityname = "重庆";
+        city.id = 0;
+        city.sum = 1;
+        city.pointcity[0] = 1;
+        City city1 = new City();
+        city1.cityname = "成都";
+        city1.id = 1;
+        city1.sum = 0;
+        cities[0] = city;
+        cities[1] = city1;
+        citynumber+=2;
+    }
+    static int citynumber = 5;
+    static Train[] trains = new Train[1024];
+    static int trainnumber = 10;
+    static String trainfilename = "C:/Users/Rekkles/Desktop/trains.txt";
+    static String cityfilename = "C:/Users/Rekkles/Desktop/citys.txt";
+    static City[] cities = new City[30];
+    public static void main(String[] args) throws IOException, ParseException {
+        cities = getcity(cityfilename);
+        trains = gettrain(trainfilename);
+        while(true) {
+        System.out.println("*********************************");
+        System.out.println("***********全国交通系统************");
+        System.out.println("*********************************");
+        System.out.println("输入1管理城市信息");
+        System.out.println("输入2管理列车时刻表");
+        System.out.println("输入3查看城市之间信息");
+        System.out.println("输入4全国交通咨询");
+        Scanner scanner = new Scanner(System.in);
+            System.out.println("请输入");
+            int choose = scanner.nextInt();
+            switch (choose) {
+                case 1:
+                    Admincity();
+                    break;
+                case 2:
+                    Admintrain();
+                    break;
+                case 3:
+                    showcitys();
+                    break;
+                case 4:
+                    Asktraffic();
+                    break;
+                default:
+                    break;
+            }
+        }
+        //Addcity();
+    }
+}

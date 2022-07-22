@@ -1,0 +1,352 @@
+import java.io.*;
+import java.util.Scanner;
+
+import static java.lang.System.exit;
+
+
+class nowdate{
+    private int year;
+    private int month;
+    private int step;
+
+    public int getStep() {
+        return step;
+    }
+
+    public void setStep(int step) {
+        this.step = step;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    private int day;
+    nowdate()
+    {}
+    nowdate(int year,int month,int day,int step)
+    {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.step = step;
+    }
+}
+class Tree{
+    nowdate nowdate;
+
+    Tree(nowdate nowdate)
+    {
+        new nowdate();
+        this.nowdate = nowdate;
+    }
+    Tree()
+    {
+        new nowdate();
+    }
+
+}
+public class test {
+    public static int numday(int year,int month)//判断该月天数
+    {
+        if((month==1||month==3||month==5||month==7||month==8||month==10||month==12))//31天
+            return 31;
+        if((month==4||month==6||month==9||month==11))//30天
+            return 30;
+        if(month==2)
+        {
+            if(((year%4==0)&&(year%100!=0))||(year%400==0))//判断是否为闰年
+                return 29;//是闰年
+            else
+                return 28;//不是闰年
+        }
+        return 0;
+    }
+    public static boolean xmonth(int year,int month)//判断相邻一个月有没有同一最后一天
+    {
+        if(numday(year,month+1)-numday(year,month)>=1)//下一个月减去上一个月 大于1 肯定相同
+            return true;
+        else
+            return false;
+    }
+    public static boolean over(int year,int month,int day)//判断是否越界 1越界0没越界
+    {
+        if (year>2001&&year<1900)
+            return true;
+        else if (year==2001)
+        {
+            if(month>11)
+                return true;
+            else if(month==11)
+            {
+                if(day>4)
+                    return true;
+                else return false;
+            }
+            else return false;
+        }
+        else return false;
+    }
+    public static void btree(Tree tree) throws IOException {
+        if(tree.nowdate.getYear()==2001&&tree.nowdate.getMonth()==11&&tree.nowdate.getDay()==4)//如果相等
+        {
+            if(tree.nowdate.getStep()%2==1)//如果是亚当赢的
+            {
+                System.out.println("YES！！");
+                exit(0);
+                //可以赢直接返回1
+            }
+            else//否则
+            {
+                delfrist(filename);
+                sum--;
+                if (sum== 0) {//文件都被删除完了
+                    System.out.println("NO!!!");
+                    exit(0);
+                }
+                return;
+            }
+
+        }
+        Tree ltree = new Tree();
+        ltree.nowdate = new nowdate();
+        Tree rtree = new Tree();
+        rtree.nowdate = new nowdate();
+        if(numday(tree.nowdate.getYear(),tree.nowdate.getMonth())==tree.nowdate.getDay())//传进来刚好是月末的那一天
+        {
+            if(tree.nowdate.getMonth()==12)//如果月份为12二叉树左右孩子分别的指向
+            {
+                ltree.nowdate.setMonth(1);rtree.nowdate.setMonth(1);//月份相同
+
+                ltree.nowdate.setYear(tree.nowdate.getYear()+1);//年份加1
+                rtree.nowdate.setYear(tree.nowdate.getYear()+1);
+
+                ltree.nowdate.setDay(1);//左孩子是1号
+
+                rtree.nowdate.setDay(tree.nowdate.getDay());//右孩子是下一个月的同一天
+            }
+            else//其他月份
+            {
+
+                ltree.nowdate.setYear(tree.nowdate.getYear());//年份相同
+                rtree.nowdate.setYear(tree.nowdate.getYear());
+
+                ltree.nowdate.setMonth(tree.nowdate.getMonth()+1);//月份相同
+                rtree.nowdate.setMonth(tree.nowdate.getMonth()+1);
+
+                ltree.nowdate.setDay(1);//下个月第一天
+                if(xmonth(tree.nowdate.getYear(),tree.nowdate.getMonth())&&(!over(tree.nowdate.getYear(),tree.nowdate.getMonth()+1,tree.nowdate.getDay())))//判断相邻的下个月是否有相同的一天和是否越界
+                    rtree.nowdate.setDay(tree.nowdate.getDay());//指向右孩子 指向下一个月的那一天
+                else
+                    rtree.nowdate.setDay(1);//右孩子也是下一天
+            }
+        }
+        else //不是月末的那一天
+        {
+
+            ltree.nowdate.setYear(tree.nowdate.getYear());//左孩子年份相同
+
+            ltree.nowdate.setMonth(tree.nowdate.getMonth());//月份相同
+
+            ltree.nowdate.setDay(tree.nowdate.getDay()+1);//左边开始 左孩子天数加1
+
+            rtree.nowdate.setDay(tree.nowdate.getDay());//天数为当前天数
+            if(tree.nowdate.getMonth()==12)//如果是12月
+            {
+
+                rtree.nowdate.setYear(tree.nowdate.getYear()+1);//下一年
+                rtree.nowdate.setMonth(1);//将月份设置为1
+            }
+            else if(!over(tree.nowdate.getYear(),tree.nowdate.getMonth()+1,tree.nowdate.getDay()))//如果且没有越界不是就年不变 月份加1
+            {
+
+                rtree.nowdate.setYear(tree.nowdate.getYear());
+                rtree.nowdate.setMonth(tree.nowdate.getMonth()+1);
+            }
+            else
+            {
+                rtree.nowdate.setYear(tree.nowdate.getYear());
+                rtree.nowdate.setMonth(tree.nowdate.getMonth());
+                rtree.nowdate.setDay(tree.nowdate.getDay()+1);
+            }
+        }
+
+        ltree.nowdate.setStep(tree.nowdate.getStep()+1);
+        rtree.nowdate.setStep(tree.nowdate.getStep()+1);
+        if(rtree.nowdate.getYear()==2001&&rtree.nowdate.getMonth()==11&&rtree.nowdate.getDay()==4)//如果相等
+        {
+            if (rtree.nowdate.getStep() % 2 == 1)//如果是亚当赢的
+            {
+                System.out.println("YES！！");
+                exit(0);
+                //可以赢直接返回1
+            }
+        }
+        if(ltree.nowdate.getYear()==2001&&ltree.nowdate.getMonth()==11&&ltree.nowdate.getDay()==4)//如果相等
+        {
+            if (ltree.nowdate.getStep() % 2 == 1)//如果是亚当赢的
+            {
+                System.out.println("YES！！");
+                exit(0);
+                //可以赢直接返回1
+            }
+        }
+        if (ltree.nowdate.getMonth() == rtree.nowdate.getMonth() && ltree.nowdate.getYear() == rtree.nowdate.getYear() && ltree.nowdate.getDay() == rtree.nowdate.getDay()
+        ) {
+            insert(filename,ltree);
+            sum++;
+        }
+        else {
+            sum += 2;
+            insert(filename, rtree);
+            insert(filename, ltree);
+        }
+        delfrist(filename);
+        sum--;
+    }
+
+    public static Tree getfrist(String fileName) throws IOException {
+        String[] str = new String[4];
+        try {
+            File myFile = new File(fileName);//通过字符串创建File类型对象，指向该字符串路径下的文件
+
+            if (myFile.isFile() && myFile.exists()) { //判断文件是否存在
+                FileInputStream fileInputStream = new FileInputStream(myFile);
+                InputStreamReader Reader = new InputStreamReader(fileInputStream, "UTF-8");
+                //考虑到编码格式，new FileInputStream(myFile)文件字节输入流，以字节为单位对文件中的数据进行读取
+                //new InputStreamReader(FileInputStream a, "编码类型")
+                //将文件字节输入流转换为文件字符输入流并给定编码格式
+
+                BufferedReader bufferedReader = new BufferedReader(Reader);
+                //BufferedReader从字符输入流中读取文本，缓冲各个字符，从而实现字符、数组和行的高效读取。
+                //通过BuffereReader包装实现高效读取
+                int i = 0;
+                String lineTxt = null;
+                Tree tree = new Tree();
+                tree.nowdate = new nowdate();
+                while ((lineTxt = bufferedReader.readLine()) != null) {//获取目前文件中的数据
+                    if(i==1)
+                        break;
+                    str = lineTxt.split(" ");
+                    tree.nowdate.setYear(Integer.parseInt(str[0]));
+                    tree.nowdate.setMonth(Integer.parseInt(str[1]));
+                    tree.nowdate.setDay(Integer.parseInt(str[2]));
+                    tree.nowdate.setStep(Integer.parseInt(str[3]));
+                    i++;
+                }
+
+                Reader.close();
+                bufferedReader.close();
+                fileInputStream.close();
+                return tree;
+            } else {
+
+                System.out.println("找不到指定的文件");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("读取文件内容出错");
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static void delfrist(String fileName) throws IOException {
+
+        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
+
+//Initial write position
+
+        long writePosition = raf.getFilePointer();
+
+        raf.readLine();
+
+// Shift the next lines upwards.
+
+        long readPosition = raf.getFilePointer();
+
+        byte[] buff = new byte[10000];
+
+        int n;
+
+        while (-1 != (n = raf.read(buff))) {
+
+            raf.seek(writePosition);
+
+            raf.write(buff, 0, n);
+
+            readPosition += n;
+
+            writePosition += n;
+
+            raf.seek(readPosition);
+
+        }
+
+        raf.setLength(writePosition);
+
+        raf.close();
+    }
+    public static void insert(String filename,Tree tree) throws IOException {//追加写入树节点
+        File f = new File(filename);
+        if (f.exists()) {
+            //System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f,true));//true,则追加写入text文本
+        String carmessage = tree.nowdate.getYear()+" "+tree.nowdate.getMonth()+" "+tree.nowdate.getDay()+" "+tree.nowdate.getStep();
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+
+    static String filename = "C:/Users/Rekkles/Desktop/data.txt";
+    static long sum = 0;
+    public static void main(String[] args) throws IOException {
+        System.out.println("请输入年月日");
+        Scanner scanner = new Scanner(System.in);
+        int year = scanner.nextInt();
+        int month = scanner.nextInt();
+        int day = scanner.nextInt();
+        Tree tree = new Tree();
+
+        tree.nowdate = new nowdate(year,month,day,0);
+        insert(filename,tree);
+        sum++;
+        while(true) {
+            Tree tree1 = new Tree();
+            tree1.nowdate = new nowdate();
+            tree1 = getfrist(filename);
+            btree(tree1);
+
+        }
+
+    }
+}

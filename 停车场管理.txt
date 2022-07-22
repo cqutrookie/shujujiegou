@@ -1,0 +1,341 @@
+import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+
+
+class Mystack1<T> {//实现栈结构
+    //实现栈的数组
+    private Object[] stack;
+    //数组大小
+    private int size;
+
+    Mystack1() {
+        stack = new Object[10];//初始容量为10
+    }
+
+    //判断是否为空
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    //返回栈顶元素
+    public T peek() {
+        T t = null;
+        if (size > 0)
+            t = (T) stack[size - 1];
+        return t;
+    }
+
+    public void push(T t) {
+        stack[size] = t;
+        size++;
+    }
+
+    //出栈
+    public T pop() {
+        T t = peek();
+        if (size > 0) {
+            stack[size - 1] = null;
+            size--;
+        }
+        return t;
+    }
+}
+class car {
+    private String carid;
+    private String pos;
+    private String startTime;
+    private String endTime;
+
+
+
+    public String getCarid() {
+        return carid;
+    }
+
+    public void setCarid(String carid) {
+        this.carid = carid;
+    }
+
+    public String getPos() {
+        return pos;
+    }
+
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+    car(){
+
+    }
+    car(String carid,String pos,String startTime){
+        this.carid = carid;
+        this.pos = pos;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+}
+
+
+
+public class Main {
+    public static void update(String filename,ArrayList<car> cars) throws IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f,false));//false,覆盖
+        for (int i = 0; i < cars.size(); i++) {
+            String carmessage = cars.get(i).getCarid()+" "+cars.get(i).getPos()+" "+cars.get(i).getStartTime();
+            output.write(carmessage);
+            output.write("\r\n");//换行
+            output.flush();
+        }
+
+        output.close();
+    }
+    public static void insertcar(String filename,car car) throws IOException {
+        File f = new File(filename);
+        if (f.exists()) {
+            System.out.print("文件存在");
+        } else {
+            System.out.print("文件不存在");
+            f.createNewFile();// 不存在则创建
+        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(f,true));//true,则追加写入text文本
+        String carmessage = car.getCarid()+" "+car.getPos()+" "+car.getStartTime();
+        output.write(carmessage);
+        output.write("\r\n");//换行
+        output.flush();
+        output.close();
+    }
+    public static ArrayList<car> getcarmessage(String fileName) {
+        String[] str = new String[3];
+        try {
+            File myFile = new File(fileName);//通过字符串创建File类型对象，指向该字符串路径下的文件
+
+            if (myFile.isFile() && myFile.exists()) { //判断文件是否存在
+
+                InputStreamReader Reader = new InputStreamReader(new FileInputStream(myFile), "UTF-8");
+                //考虑到编码格式，new FileInputStream(myFile)文件字节输入流，以字节为单位对文件中的数据进行读取
+                //new InputStreamReader(FileInputStream a, "编码类型")
+                //将文件字节输入流转换为文件字符输入流并给定编码格式
+
+                BufferedReader bufferedReader = new BufferedReader(Reader);
+                //BufferedReader从字符输入流中读取文本，缓冲各个字符，从而实现字符、数组和行的高效读取。
+                //通过BuffereReader包装实现高效读取
+
+                String lineTxt = null;
+                ArrayList<car> cars = new ArrayList<>();
+                while ((lineTxt = bufferedReader.readLine()) != null) {//获取目前文件中的数据
+                    //buffereReader.readLine()按行读取写成字符串
+
+                    str = lineTxt.split(" ");
+                    car car = new car();
+                    car.setCarid(str[0]);
+                    car.setPos(str[1]);
+                    car.setStartTime(str[2]);
+                    cars.add(car);
+                }
+
+                Reader.close();
+                return cars;
+            } else {
+
+                System.out.println("找不到指定的文件");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("读取文件内容出错");
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static void mainpage()
+    {
+        System.out.println("..................");
+        System.out.println("...停车场管理系统...");
+        System.out.println("..................");
+        System.out.println("输入1查看目前停车场信息");
+        System.out.println("输入2登记入车位信息");
+        System.out.println("输入3车离开登记");
+        System.out.print("请输入你的选择:");
+    }
+    public static void ShowCarmessage()
+    {
+        int i,j=0;
+        ArrayList<car> cars = getcarmessage(filename);
+        for(i = 0; i < cars.size() ;i++){
+            if (cars.get(i).getPos().equals("PARKING"))
+            System.out.println("停车场的"+(i+1)+"号位置车牌号为"+cars.get(i).getCarid()+"位置为"+cars.get(i).getPos()+"开始停车时间为"+cars.get(i).getStartTime());
+            if (cars.get(i).getPos().equals("WAIT")) {
+                System.out.println("便道上的" + (j + 1) + "号位置车牌号为" + cars.get(i).getCarid() + "位置为" + cars.get(i).getPos() + "开始停车时间为" + cars.get(i).getStartTime());
+                j++;
+            }
+        }
+        if(cars.size()==0)
+        {
+            System.out.println("目前停车场空空如也哦");
+        }
+    }
+    public static void InsertCar() throws IOException {
+        System.out.println("请输入车牌信息");
+        String insertcarid = new Scanner(System.in).next();
+        ArrayList<car> cars = getcarmessage(filename);
+        int i,number = 0;
+        for(i = 0;i < cars.size();i++)
+        {
+            if (cars.get(i).getPos().equals("PARKING"))
+            {
+                number++;
+            }
+        }
+        if (number<parkingmax)//有位置
+        {
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd-HH:mm:ss");
+            car car = new car(insertcarid,"PARKING",String.valueOf(formatter.format(date)));
+            insertcar(filename,car);
+            System.out.println("车牌号为"+insertcarid+"的车已经停入停车场");
+        }
+        else//没位置进入等候区，暂时不给开始停车时间停入后再给
+        {
+            car car = new car(insertcarid,"WAIT","未停入");
+            insertcar(filename,car);
+            System.out.println("目前车位停满车子进入等候区等待");
+        }
+    }
+    public static void DelCar() throws ParseException, IOException//车子离开
+    {
+        System.out.println("请输入要离开车的车牌号");
+        String delcar = new Scanner(System.in).next();
+        ArrayList<car> cars = getcarmessage(filename);
+        int i,flag = 0,del;
+        Mystack1<car> stack = new Mystack1<>();
+        Mystack1<car> stackhelp = new Mystack1<>();
+        if(cars.size()==0)
+            System.out.println("目前没有车");
+        int j = 0;
+        while((j<cars.size())&&(cars.get(j).getPos().equals("PARKING")))//是停车位的车子就加入栈
+        {
+            stack.push(cars.get(j));
+            j++;
+            flag++;
+        }
+        for(i = 0; i<cars.size();i++)
+        {
+
+            if(cars.get(i).getCarid().equals(delcar)&&cars.get(i).getPos().equals("PARKING"))//车在车库里并且是处于停车的状态
+            {
+                j = 0;
+                del = i;
+                while(!(stack.peek().getCarid().equals(delcar))&&!stack.isEmpty())//将车后面的车放入新的栈中让自己出来
+                {
+                        stackhelp.push(stack.pop());
+                        System.out.println("车牌号为"+stackhelp.peek().getCarid()+"暂时离开车位");
+
+                    flag--;
+                }
+
+                Date enddate = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+                Date start = sdf.parse(stack.peek().getStartTime());
+                long time = enddate.getTime()-start.getTime();
+                long money = time/1000/60*3;
+                System.out.println("车牌号为"+stack.peek().getCarid()+"离开停车场"+"  收取费用"+money+"元");
+                stack.pop();//出栈
+
+                while(!stackhelp.isEmpty())
+                {
+                    stack.push(stackhelp.pop());//重新装入
+                    System.out.println("车牌号为"+stack.peek().getCarid()+"停回停车场"+flag+"号位置");
+                    flag++;
+                }
+                j = 0;
+                while(!cars.get(j).getPos().equals("WAIT"))
+                {
+                    j++;
+                    if(j>=cars.size())
+                        break;
+                }
+                if(j<cars.size())
+                {
+                    cars.get(j).setPos("PARKING");
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd-HH:mm:ss");
+                    cars.get(j).setStartTime(formatter.format(date));
+                    System.out.println("车牌号为"+cars.get(j).getCarid()+"从便道上进入停车场的"+flag+"位置");
+                }
+                else
+                    System.out.println("目前便道上没有车等待");
+                ArrayList<car> newcars = new ArrayList<>();
+                for(j=0;j<cars.size();j++)//创建新的信息
+                {
+                    if(j!=del)
+                    {
+                        newcars.add(cars.get(j));
+                    }
+                }
+                update(filename,newcars);
+                break;
+            }
+        }
+        if (i>cars.size())
+        System.out.println("车目前不在停车状态或者输入车牌有误");
+
+
+    }
+    public static void wrongmesage()
+    {
+        System.out.println("输入指令有误");
+    }
+    static int parkingmax = 5;
+    static String filename = "C:/Users/Administrator/Desktop/car.txt";
+    public static void main(String[] args) throws IOException, ParseException {
+        while(true) {
+            mainpage();
+            int i = new Scanner(System.in).nextInt();
+            switch (i) {
+                case 1:
+                    ShowCarmessage();
+                    break;
+                case 2:
+                    InsertCar();
+                    break;
+                case 3:
+                    DelCar();
+                    break;
+                default:
+                    wrongmesage();
+                    break;
+            }
+            System.out.println("按回车键继续");
+            new BufferedReader(new InputStreamReader(System.in)).readLine();
+        }
+    }
+}
+
